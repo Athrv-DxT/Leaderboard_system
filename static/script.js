@@ -4,7 +4,9 @@ let isAnimating = false;
 
 // Auto-refresh leaderboard every 3 seconds for faster updates
 setInterval(() => {
-    if (window.location.pathname === '/public_leaderboard' || window.location.pathname === '/') {
+    if (window.location.pathname === '/public_leaderboard' || 
+        window.location.pathname === '/' || 
+        window.location.pathname === '/admin') {
         fetchLeaderboardData();
     }
 }, 3000);
@@ -211,43 +213,47 @@ function updateLeaderboardDisplay(leaderboard) {
     
     console.log('Updated leaderboard:', leaderboard.slice(0, 5));
     
-    // Update top 3 - ensure correct order
+    // Update top 3 - ensure correct order (only on public leaderboard)
     const top3Cards = document.querySelectorAll('.player-card');
-    const top3Order = [1, 0, 2]; // second, first, third (visual order)
-    
-    top3Order.forEach((cardIndex, visualIndex) => {
-        const card = top3Cards[visualIndex];
-        const player = leaderboard[cardIndex];
+    if (top3Cards.length > 0) {
+        const top3Order = [1, 0, 2]; // second, first, third (visual order)
         
-        if (player) {
-            const nameElement = card.querySelector('p');
-            const scoreElement = card.querySelector('span');
+        top3Order.forEach((cardIndex, visualIndex) => {
+            const card = top3Cards[visualIndex];
+            if (!card) return; // Skip if card doesn't exist
             
-            // Update name with animation
-            if (nameElement && nameElement.textContent !== player.name) {
-                nameElement.style.animation = 'nameChange 0.5s ease';
-                setTimeout(() => {
-                    nameElement.textContent = player.name;
-                    nameElement.style.animation = '';
-                }, 250);
-            }
+            const player = leaderboard[cardIndex];
             
-            // Update score with animation
-            if (scoreElement && scoreElement.textContent !== player.score.toString()) {
-                scoreElement.style.animation = 'scoreChange 0.5s ease';
-                setTimeout(() => {
-                    scoreElement.textContent = player.score;
-                    scoreElement.style.animation = '';
-                }, 250);
+            if (player) {
+                const nameElement = card.querySelector('p');
+                const scoreElement = card.querySelector('span');
+                
+                // Update name with animation
+                if (nameElement && nameElement.textContent !== player.name) {
+                    nameElement.style.animation = 'nameChange 0.5s ease';
+                    setTimeout(() => {
+                        nameElement.textContent = player.name;
+                        nameElement.style.animation = '';
+                    }, 250);
+                }
+                
+                // Update score with animation
+                if (scoreElement && scoreElement.textContent !== player.score.toString()) {
+                    scoreElement.style.animation = 'scoreChange 0.5s ease';
+                    setTimeout(() => {
+                        scoreElement.textContent = player.score;
+                        scoreElement.style.animation = '';
+                    }, 250);
+                }
+            } else {
+                // Clear if no player at this position
+                const nameElement = card.querySelector('p');
+                const scoreElement = card.querySelector('span');
+                if (nameElement) nameElement.textContent = '—';
+                if (scoreElement) scoreElement.textContent = '0';
             }
-        } else {
-            // Clear if no player at this position
-            const nameElement = card.querySelector('p');
-            const scoreElement = card.querySelector('span');
-            if (nameElement) nameElement.textContent = '—';
-            if (scoreElement) scoreElement.textContent = '0';
-        }
-    });
+        });
+    }
     
     // Update table rows with smooth transitions
     const tbody = document.getElementById('leaderboard-body');
@@ -277,6 +283,32 @@ function updateLeaderboardDisplay(leaderboard) {
             }, index * 50);
         });
     }
+    
+    // Update admin page if we're on admin page
+    updateAdminDisplay(leaderboard);
+}
+
+// Update admin display (separate function for admin page)
+function updateAdminDisplay(leaderboard) {
+    const playerList = document.getElementById('playerList');
+    if (!playerList) return; // Not on admin page
+    
+    playerList.innerHTML = '';
+    
+    leaderboard.forEach((player, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span>#${player.rank} <strong>${player.name}</strong> — ${player.score}</span>
+            <div>
+                <button onclick="updateScore('${player.name}', 10)" class="btn-add">+10</button>
+                <button onclick="updateScore('${player.name}', -10)" class="btn-subtract">-10</button>
+                <input type="number" id="custom-${player.name}" placeholder="± Score" class="custom-input">
+                <button onclick="customUpdate('${player.name}')" class="btn-custom">Apply</button>
+                <button style="background:#444" onclick="deletePlayer('${player.name}')" class="btn-delete">❌</button>
+            </div>
+        `;
+        playerList.appendChild(li);
+    });
 }
 
 // Add comprehensive CSS animations
