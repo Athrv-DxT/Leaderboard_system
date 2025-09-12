@@ -163,11 +163,31 @@ def get_leaderboard_data():
     leaderboard = []
     for i, player in enumerate(players, 1):
         data = player.to_dict()
+        score = data.get('score', 0)
+        # Ensure score is properly converted to integer
+        try:
+            score = int(score)
+        except (ValueError, TypeError):
+            score = 0
+        
         leaderboard.append({
             'rank': i,
-            'name': data['name'],
-            'score': data['score']
+            'name': data.get('name', 'Unknown'),
+            'score': score
         })
+    
+    # Double-check sorting by score (highest first)
+    leaderboard.sort(key=lambda x: x['score'], reverse=True)
+    
+    # Update ranks after sorting
+    for i, player in enumerate(leaderboard):
+        player['rank'] = i + 1
+    
+    # Debug: Print current leaderboard
+    print("Current leaderboard:")
+    for player in leaderboard[:5]:  # Print top 5
+        print(f"  {player['rank']}. {player['name']} - {player['score']}")
+    
     return leaderboard
 
 def background_sync():
