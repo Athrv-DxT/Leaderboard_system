@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FunFinity Admin Panel</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ FunFinity Admin Panel</h1>
+
+    <!-- Login form -->
+    <div id="login-section" class="card">
+      <h2>🔑 Admin Login</h2>
+      <input type="email" id="email" placeholder="Admin Email">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Admin dashboard -->
+    <div id="admin-section" class="card" style="display:none;">
+      <h2>🎮 Manage Players</h2>
+      <form id="playerForm">
+        <input type="text" id="playerName" placeholder="Player Name" required>
+        <button type="submit">➕ Add Player</button>
+      </form>
+
+      <h3>Players</h3>
+      <ul id="playerList"></ul>
+    </div>
+  </div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

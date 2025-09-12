@@ -1,0 +1,49 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+console.log("Script loaded ✅");
+
+// Your Firebase config here
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+// Init Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+console.log("Firebase initialized ✅");
+
+// Reference to the collection
+const playersRef = collection(db, "players");
+
+// Real-time listener
+onSnapshot(playersRef, (snapshot) => {
+  console.log("Realtime update received ✅");
+  let players = [];
+  snapshot.forEach((doc) => {
+    console.log("Doc:", doc.id, "=>", doc.data());
+    players.push(doc.data());
+  });
+
+  if (players.length === 0) {
+    console.warn("No players found in Firestore!");
+  }
+
+  players.sort((a, b) => b.score - a.score);
+
+  let tableBody = document.getElementById("leaderboard-body");
+  tableBody.innerHTML = "";
+  players.forEach((player, index) => {
+    tableBody.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${player.name}</td>
+        <td>${player.score}</td>
+      </tr>`;
+  });
+});

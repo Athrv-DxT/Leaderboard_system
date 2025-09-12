@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: funfinity-leaderboard
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python leaderboard_backend.py
+    envVars:
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: /opt/render/project/serviceAccountKey.json
+      - key: API_URL
+        value: https://web-production-3b67.up.railway.app/api/users
+      - key: API_KEY
+        value: 1f8c3f7c0b9d4f25a6b1e2c93d7f48aa3f9c1e7b5a64c2d1e0f3a8b7c6d5e4f1

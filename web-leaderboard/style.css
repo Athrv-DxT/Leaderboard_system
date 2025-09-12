@@ -1,0 +1,226 @@
+/* paradox.css - starry moving background + dark blues */
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  font-family:'Poppins',sans-serif;
+  background:#000;
+  color:#fff;
+}
+
+/* star layers */
+.stars, .twinkling {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  z-index:0;
+  pointer-events:none;
+}
+
+/* static small stars (image hosted free) */
+.stars {
+  background: url("images/stars.jpg") repeat;
+  opacity:0.6;
+  transform: translateZ(0);
+}
+
+/* twinkling/slow moving layer for parallax feel */
+.twinkling {
+  background: url("images/twinkle.jpg") repeat;
+  animation: drift 120s linear infinite;
+  opacity:0.5;
+}
+
+@keyframes drift {
+  from { background-position: 0 0; }
+  to   { background-position: -8000px 4000px; }
+}
+
+/* content sits above */
+.content {
+  position: relative;
+  z-index:2;
+  max-width:1200px;
+  margin: 40px auto;
+  text-align:center;
+  padding:20px;
+}
+
+/* heading */
+.content h1 {
+  font-size:2.4rem;
+  margin-bottom:18px;
+  color:#aee8ff;
+  text-shadow:0 0 16px rgba(0,180,255,0.15);
+}
+
+/* top-3 podium */
+.top-3 {
+  display:flex;
+  justify-content:center;
+  gap:26px;
+  margin-bottom:30px;
+}
+
+.player-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border-radius:14px;
+  padding:18px;
+  width:140px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.player-card:hover { transform: translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,0.7); }
+
+.trophy {
+  width:58px; height:58px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+  color:#111;
+  margin: 0 auto 10px;
+  font-size:1.2rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+.gold { background: #ffd166; }
+.silver { background: #c7c7c7; }
+.bronze { background: #cd7f32; }
+
+.player-card p { margin:6px 0 4px; font-weight:600; color:#e6faff; }
+.player-card span { color:#bff1ff; font-weight:700; }
+
+/* leaderboard table styling */
+table {
+  width:86%;
+  margin: 0 auto 60px;
+  border-collapse:collapse;
+  background: rgba(10,20,40,0.6);
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+}
+
+th, td {
+  padding:14px 18px;
+  text-align:left;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color:#e8faff;
+}
+
+th {
+  background: linear-gradient(90deg, rgba(0,150,220,0.14), rgba(0,60,120,0.12));
+  color:#fff6d8;
+  font-weight:700;
+}
+
+#leaderboard-body tr {
+  transition: transform .45s cubic-bezier(.2,.9,.2,1), background .35s ease;
+}
+
+/* flash animation class (apply when score changes in script.js) */
+.flash {
+  animation: flashAnim 1s ease;
+}
+@keyframes flashAnim {
+  0% { background: rgba(0,255,150,0.14); transform: scale(1.01); }
+  100% { background: transparent; transform: scale(1); }
+}
+
+/* small responsive tweaks */
+@media (max-width:760px){
+  .top-3 { gap:12px; flex-wrap:wrap; }
+  table { width:95%; }
+}
+
+/* Background Morphing Effect */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(270deg, #1e1f29, #111, #2a2a72);
+  background-size: 600% 600%;
+  animation: gradientMorph 20s ease infinite;
+  color: white;
+}
+
+@keyframes gradientMorph {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Leaderboard Container */
+.leaderboard {
+  max-width: 700px;
+  margin: 50px auto;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  text-align: center;
+  transition: transform 0.4s ease-in-out;
+}
+
+.leaderboard:hover {
+  transform: scale(1.02);
+}
+
+/* Title */
+.leaderboard h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+/* Top 3 Players */
+.top-3 {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30px;
+}
+
+.top-player {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+  transition: transform 0.5s ease;
+}
+
+.top-player:hover {
+  transform: translateY(-10px) scale(1.1);
+}
+
+/* Specific Rank Styles */
+.first {
+  background: linear-gradient(135deg, #FFD700, #ff8800);
+  animation: morph1 6s infinite alternate;
+}
+.second {
+  background: linear-gradient(135deg, #C0C0C0, #5dade2);
+  animation: morph2 6s infinite alternate;
+}
+.third {
+  background: linear-gradient(135deg, #cd7f32, #ff6f00);
+  animation: morph3 6s infinite alternate;
+}
+
+@keyframes morph1 {
+  0% { border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%; }
+  100% { border-radius: 60% 40% 40% 60% / 60% 60% 40% 40%; }
+}
+@keyframes morph2 {
+  0% { border-radius: 50% 70% 50% 70% / 70% 50% 70% 50%; }
+  100% { border-radius: 70% 50% 70% 50% / 50% 70% 50% 70%; }
+}
+@keyframes morph3 {
+  0% { border-radius: 30% 70% 70% 30% / 30% 70% 30% 70%; }
+  100% { border-radius: 70% 30% 30% 70% / 70% 30% 70% 30%; }
+}
+
+
