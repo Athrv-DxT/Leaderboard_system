@@ -258,18 +258,15 @@ function updateLeaderboardDisplay(leaderboard) {
     // Update table rows with smooth transitions
     const tbody = document.getElementById('leaderboard-body');
     if (tbody) {
-        // Store current rows for animation
-        const currentRows = Array.from(tbody.querySelectorAll('tr'));
-        
-        // Clear and rebuild
+        // Clear and rebuild with ALL players (not just slice(3))
         tbody.innerHTML = '';
-        leaderboard.slice(3).forEach((player, index) => {
+        leaderboard.forEach((player, index) => {
             const row = document.createElement('tr');
             row.setAttribute('data-player', player.name);
             row.style.opacity = '0';
             row.style.transform = 'translateY(20px)';
             row.innerHTML = `
-                <td>${index + 4}</td>
+                <td>${player.rank}</td>
                 <td>${player.name}</td>
                 <td>${player.score}</td>
             `;
