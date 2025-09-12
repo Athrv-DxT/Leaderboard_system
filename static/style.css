@@ -6,11 +6,14 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     background: #000;
     color: #fff;
     min-height: 100vh;
     overflow-x: hidden;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
 }
 
 /* Dynamic Animated Background */
@@ -120,8 +123,8 @@ body::before {
     padding: 20px;
 }
 
-/* Import elegant fonts */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&display=swap');
+/* Import ultra-elegant fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+Pro:wght@200;300;400;600;700;900&display=swap');
 
 .main-heading {
     text-align: center;
@@ -130,48 +133,53 @@ body::before {
 }
 
 .heading-line-1 {
-    font-family: 'Orbitron', monospace;
-    font-size: 4.5rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    font-weight: 800;
+    font-style: italic;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 3px;
+    text-shadow: 0 0 60px rgba(102, 126, 234, 0.4);
+    animation: gradientShift 8s ease infinite, elegantGlow 3s ease-in-out infinite alternate;
+    margin-bottom: -5px;
+    position: relative;
+    z-index: 2;
+    line-height: 0.9;
+}
+
+.heading-line-2 {
+    font-family: 'Crimson Text', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    font-style: italic;
+    color: #e8f4fd;
+    letter-spacing: 8px;
+    margin-bottom: 8px;
+    opacity: 0.95;
+    text-shadow: 0 0 30px rgba(232, 244, 253, 0.6);
+    animation: fadeInUp 1.2s ease 0.8s both, subtleFloat 4s ease-in-out infinite;
+    position: relative;
+}
+
+.heading-line-3 {
+    font-family: 'Source Serif Pro', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #ff8a80 50%, #ff6b6b 75%, #ee5a24 100%);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    letter-spacing: 8px;
-    text-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
-    animation: gradientShift 6s ease infinite, glow 2s ease-in-out infinite alternate;
-    margin-bottom: -10px;
-    position: relative;
-    z-index: 2;
-}
-
-.heading-line-2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.8rem;
-    font-weight: 300;
-    color: #aee8ff;
     letter-spacing: 4px;
-    margin-bottom: 5px;
-    opacity: 0.9;
-    text-shadow: 0 0 20px rgba(174, 232, 255, 0.5);
-    animation: fadeInUp 1s ease 0.5s both;
-}
-
-.heading-line-3 {
-    font-family: 'Exo 2', sans-serif;
-    font-size: 3.2rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, #ffd700, #ffed4e, #fff176, #ffeb3b, #ffc107);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 6px;
-    text-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
-    animation: gradientShift 4s ease infinite, glow 2s ease-in-out infinite alternate, fadeInUp 1s ease 1s both;
+    text-shadow: 0 0 70px rgba(255, 107, 107, 0.5);
+    animation: gradientShift 6s ease infinite, elegantGlow 3s ease-in-out infinite alternate, fadeInUp 1.5s ease 1.2s both;
     position: relative;
     z-index: 2;
+    line-height: 1.1;
 }
 
 .main-heading::before {
@@ -199,6 +207,106 @@ body::before {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes elegantGlow {
+    0% {
+        text-shadow: 0 0 60px rgba(102, 126, 234, 0.4), 0 0 80px rgba(102, 126, 234, 0.2);
+    }
+    100% {
+        text-shadow: 0 0 80px rgba(102, 126, 234, 0.6), 0 0 100px rgba(102, 126, 234, 0.3);
+    }
+}
+
+@keyframes subtleFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Enhanced body typography */
+body {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+}
+
+/* Elegant button typography */
+button, .btn, .admin-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+/* Admin page typography */
+.admin-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 2px;
+}
+
+.login-card h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 1.5px;
+}
+
+/* Form elements typography */
+input, select, textarea {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+/* Navigation typography */
+nav a, .admin-link a {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* Elegant table typography */
+table {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+th {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+td {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+}
+
+/* Player card typography */
+.player-card p {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.player-card span {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
 @keyframes gradientText {
