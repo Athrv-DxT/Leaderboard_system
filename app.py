@@ -180,9 +180,11 @@ def background_sync():
             print(f"Error in background sync: {e}")
             time.sleep(30)
 
-# Start background sync thread
-sync_thread = threading.Thread(target=background_sync, daemon=True)
-sync_thread.start()
+# Start background sync thread (only if not in test mode)
+if not os.environ.get('TESTING'):
+    sync_thread = threading.Thread(target=background_sync, daemon=True)
+    sync_thread.start()
+    print("Background sync thread started")
 
 # === Flask Routes ===
 
@@ -255,6 +257,12 @@ def public_leaderboard():
     leaderboard = get_leaderboard_data()
     return render_template('public_leaderboard.html', leaderboard=leaderboard)
 
+@app.route('/health')
+def health():
+    """Health check endpoint for Render"""
+    return jsonify({'status': 'healthy', 'message': 'FunFinity Leaderboard is running'})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    print(f"Starting Flask app on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)

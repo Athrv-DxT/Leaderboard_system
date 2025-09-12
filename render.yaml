@@ -3,7 +3,8 @@ services:
     name: funfinity-leaderboard
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: python start.py
+    plan: free
     envVars:
       - key: FIREBASE_SERVICE_ACCOUNT_JSON
         value: YOUR_FIREBASE_SERVICE_ACCOUNT_JSON_HERE
@@ -16,4 +17,4 @@ services:
       - key: ADMIN_PASSWORD
         value: admin123
       - key: SECRET_KEY
-        value: your-secret-key-change-this-in-production
+        value: 499d40c5943dba125e65670bbf7d3a4bfaa350faa4f313050b968ebc5f8688f8
