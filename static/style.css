@@ -120,34 +120,85 @@ body::before {
     padding: 20px;
 }
 
-.content h1 {
-    font-size: 3.5rem;
-    margin-bottom: 30px;
+/* Import elegant fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600;700;800;900&display=swap');
+
+.main-heading {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.heading-line-1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 4.5rem;
+    font-weight: 900;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradientText 3s ease infinite;
-    text-shadow: 0 0 30px rgba(255,255,255,0.3);
-    font-weight: 800;
-    letter-spacing: 2px;
+    letter-spacing: 8px;
+    text-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+    animation: gradientShift 6s ease infinite, glow 2s ease-in-out infinite alternate;
+    margin-bottom: -10px;
     position: relative;
+    z-index: 2;
 }
 
-.content h1::before {
+.heading-line-2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: #aee8ff;
+    letter-spacing: 4px;
+    margin-bottom: 5px;
+    opacity: 0.9;
+    text-shadow: 0 0 20px rgba(174, 232, 255, 0.5);
+    animation: fadeInUp 1s ease 0.5s both;
+}
+
+.heading-line-3 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 3.2rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, #ffd700, #ffed4e, #fff176, #ffeb3b, #ffc107);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 6px;
+    text-shadow: 0 0 50px rgba(255, 215, 0, 0.7);
+    animation: gradientShift 4s ease infinite, glow 2s ease-in-out infinite alternate, fadeInUp 1s ease 1s both;
+    position: relative;
+    z-index: 2;
+}
+
+.main-heading::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
     background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
     background-size: 300% 300%;
-    border-radius: 20px;
+    border-radius: 30px;
     z-index: -1;
-    opacity: 0.1;
-    animation: gradientText 3s ease infinite;
+    filter: blur(25px);
+    opacity: 0.2;
+    animation: gradientShift 6s ease infinite;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes gradientText {
