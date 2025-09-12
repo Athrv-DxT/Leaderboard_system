@@ -1,3 +1,5 @@
 firebase-admin==7.1.0
 google-cloud-firestore==2.21.0
 requests==2.32.5
+flask==3.0.0
+flask-session==0.5.0

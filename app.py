@@ -5,13 +5,23 @@ import json
 import os
 import sys
 import time
+import threading
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from datetime import timedelta
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+
+# Admin credentials (in production, use environment variables)
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')
 
 def initialize_firebase():
     # Try environment variable first (most secure for cloud)
     service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
     if service_account_json:
         try:
-            import json
             cred_dict = json.loads(service_account_json)
             cred_obj = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred_obj)
@@ -38,14 +48,6 @@ def initialize_firebase():
 
     print("Failed to initialize Firebase Admin SDK.")
     print("Reason:", last_err)
-    print(
-        "Please provide a valid Service Account JSON file (not the web SDK config).\n"
-        "Options:\n"
-        "1) Set env var FIREBASE_SERVICE_ACCOUNT_JSON with the JSON content.\n"
-        "2) Set env var GOOGLE_APPLICATION_CREDENTIALS to point to your service account JSON file.\n"
-        "3) Place the JSON at 'serviceAccountKey.json' in this directory.\n"
-        "Get it from Firebase Console → Project Settings → Service accounts → Generate new private key."
-    )
     sys.exit(1)
 
 # Initialize Firebase
@@ -154,54 +156,105 @@ def sync_users_from_api():
         doc_ref.delete()
         deleted_count += 1
 
-    print(
-        f"Synced users. Created {created_count}, deleted {deleted_count}. Total API users: {len(api_set)}"
-    )
+    print(f"Synced users. Created {created_count}, deleted {deleted_count}. Total API users: {len(api_set)}")
 
-def clear_console():
-    try:
-        os.system('cls' if os.name == 'nt' else 'clear')
-    except Exception:
-        pass
+def get_leaderboard_data():
+    players = db.collection("players").order_by("score", direction=firestore.Query.DESCENDING).stream()
+    leaderboard = []
+    for i, player in enumerate(players, 1):
+        data = player.to_dict()
+        leaderboard.append({
+            'rank': i,
+            'name': data['name'],
+            'score': data['score']
+        })
+    return leaderboard
 
-def refresh_loop(interval_seconds: int = 2):
-    print(f"Starting refresh loop. Syncing from API every {interval_seconds} seconds. Press Ctrl+C to stop.")
+def background_sync():
+    """Background thread for syncing users from API"""
     while True:
         try:
             sync_users_from_api()
-            clear_console()
-            get_leaderboard()
-            time.sleep(interval_seconds)
-        except KeyboardInterrupt:
-            print("\nStopped refresh loop.")
-            break
+            time.sleep(30)  # Sync every 30 seconds
         except Exception as e:
-            # Log and continue
-            print(f"Error during refresh: {e}")
-            time.sleep(interval_seconds)
+            print(f"Error in background sync: {e}")
+            time.sleep(30)
 
-# Register new player (first login)
-def register_player(player_name):
-    db.collection("players").document(player_name).set({
-        "name": player_name,
-        "score": 0
-    })
+# Start background sync thread
+sync_thread = threading.Thread(target=background_sync, daemon=True)
+sync_thread.start()
 
-# Update score when player plays
-def update_score(player_name, points):
-    player_ref = db.collection("players").document(player_name)
-    player_ref.update({
-        "score": firestore.Increment(points)
-    })
+# === Flask Routes ===
 
-# Get current leaderboard
+@app.route('/')
+def index():
+    return redirect(url_for('public_leaderboard'))
+
+@app.route('/admin')
+def admin():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    
+    leaderboard = get_leaderboard_data()
+    return render_template('admin.html', leaderboard=leaderboard)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['admin'] = True
+            session.permanent = True
+            flash('Login successful!', 'success')
+            return redirect(url_for('admin'))
+        else:
+            flash('Invalid credentials!', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin', None)
+    flash('Logged out successfully!', 'info')
+    return redirect(url_for('login'))
+
+@app.route('/update_score', methods=['POST'])
+def update_score():
+    if 'admin' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    player_name = data.get('player_name')
+    score_change = data.get('score_change')
+    
+    if not player_name or score_change is None:
+        return jsonify({'error': 'Missing player_name or score_change'}), 400
+    
+    try:
+        player_ref = db.collection("players").document(player_name)
+        player_ref.update({
+            "score": firestore.Increment(score_change)
+        })
+        return jsonify({'success': True, 'message': f'Updated {player_name}\'s score by {score_change}'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/get_leaderboard')
 def get_leaderboard():
-    players = db.collection("players").order_by("score", direction=firestore.Query.DESCENDING).stream()
-    print("\n=== Leaderboard ===")
-    for i, player in enumerate(players, 1):
-        data = player.to_dict()
-        print(f"{i}. {data['name']} - {data['score']}")
+    if 'admin' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    leaderboard = get_leaderboard_data()
+    return jsonify(leaderboard)
 
-# Run sync from API then display leaderboard
-if __name__ == "__main__":
-    refresh_loop(2)
+@app.route('/public_leaderboard')
+def public_leaderboard():
+    """Public leaderboard view (no login required)"""
+    leaderboard = get_leaderboard_data()
+    return render_template('public_leaderboard.html', leaderboard=leaderboard)
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

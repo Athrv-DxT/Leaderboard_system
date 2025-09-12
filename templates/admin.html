@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - FunFinity{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <header class="admin-header">
+        <h1>⚡ FunFinity Admin Panel</h1>
+        <div class="admin-actions">
+            <a href="{{ url_for('public_leaderboard') }}" class="btn-secondary">View Public Leaderboard</a>
+            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <div class="admin-content">
+        <div class="stats-cards">
+            <div class="stat-card">
+                <h3>Total Players</h3>
+                <span id="total-players">{{ leaderboard|length }}</span>
+            </div>
+            <div class="stat-card">
+                <h3>Top Score</h3>
+                <span id="top-score">{{ leaderboard[0].score if leaderboard else 0 }}</span>
+            </div>
+        </div>
+
+        <div class="score-management">
+            <h2>🎮 Score Management</h2>
+            <div class="player-list">
+                {% for player in leaderboard %}
+                <div class="player-item" data-player="{{ player.name }}">
+                    <div class="player-info">
+                        <span class="rank">#{{ player.rank }}</span>
+                        <span class="name">{{ player.name }}</span>
+                        <span class="score">{{ player.score }}</span>
+                    </div>
+                    <div class="player-actions">
+                        <button onclick="updateScore('{{ player.name }}', 10)" class="btn-add">+10</button>
+                        <button onclick="updateScore('{{ player.name }}', -10)" class="btn-subtract">-10</button>
+                        <input type="number" id="custom-{{ player.name }}" placeholder="± Score" class="custom-input">
+                        <button onclick="customUpdate('{{ player.name }}')" class="btn-custom">Apply</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="sync-info">
+            <p>🔄 Auto-syncing with API every 30 seconds</p>
+            <button onclick="manualSync()" class="btn-sync">Manual Sync Now</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateScore(playerName, change) {
+    fetch('/update_score', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            player_name: playerName,
+            score_change: change
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+
+function customUpdate(playerName) {
+    const input = document.getElementById(`custom-${playerName}`);
+    const value = parseInt(input.value);
+    
+    if (!isNaN(value) && value !== 0) {
+        updateScore(playerName, value);
+        input.value = '';
+    } else {
+        alert('Enter a valid number!');
+    }
+}
+
+function manualSync() {
+    location.reload();
+}
+</script>
+{% endblock %}

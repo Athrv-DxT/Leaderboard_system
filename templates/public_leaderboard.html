@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}FunFinity Leaderboard{% endblock %}
+
+{% block content %}
+<div class="stars"></div>
+<div class="twinkling"></div>
+
+<div class="content">
+    <h1>🌌 FunFinity 2.0 — Leaderboard</h1>
+    
+    <div class="top-3">
+        <div class="player-card second">
+            <div class="trophy silver">2</div>
+            <p>{{ leaderboard[1].name if leaderboard|length > 1 else "—" }}</p>
+            <span>{{ leaderboard[1].score if leaderboard|length > 1 else "0" }}</span>
+        </div>
+
+        <div class="player-card first">
+            <div class="trophy gold">1</div>
+            <p>{{ leaderboard[0].name if leaderboard|length > 0 else "—" }}</p>
+            <span>{{ leaderboard[0].score if leaderboard|length > 0 else "0" }}</span>
+        </div>
+
+        <div class="player-card third">
+            <div class="trophy bronze">3</div>
+            <p>{{ leaderboard[2].name if leaderboard|length > 2 else "—" }}</p>
+            <span>{{ leaderboard[2].score if leaderboard|length > 2 else "0" }}</span>
+        </div>
+    </div>
+
+    <table id="leaderboard">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in leaderboard %}
+            <tr>
+                <td>{{ player.rank }}</td>
+                <td>{{ player.name }}</td>
+                <td>{{ player.score }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="admin-link">
+        <a href="{{ url_for('login') }}" class="admin-btn">Admin Login</a>
+    </div>
+</div>
+{% endblock %}
