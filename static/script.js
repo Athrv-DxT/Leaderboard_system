@@ -201,10 +201,24 @@ function playRankUpSound() {
 
 // Update leaderboard display
 function updateLeaderboardDisplay(leaderboard) {
-    // Update top 3
+    // Ensure leaderboard is properly sorted by score (highest first)
+    leaderboard.sort((a, b) => b.score - a.score);
+    
+    // Update ranks after sorting
+    leaderboard.forEach((player, index) => {
+        player.rank = index + 1;
+    });
+    
+    console.log('Updated leaderboard:', leaderboard.slice(0, 5));
+    
+    // Update top 3 - ensure correct order
     const top3Cards = document.querySelectorAll('.player-card');
-    top3Cards.forEach((card, index) => {
-        const player = leaderboard[index];
+    const top3Order = [1, 0, 2]; // second, first, third (visual order)
+    
+    top3Order.forEach((cardIndex, visualIndex) => {
+        const card = top3Cards[visualIndex];
+        const player = leaderboard[cardIndex];
+        
         if (player) {
             const nameElement = card.querySelector('p');
             const scoreElement = card.querySelector('span');
