@@ -251,6 +251,12 @@ def get_leaderboard():
     leaderboard = get_leaderboard_data()
     return jsonify(leaderboard)
 
+@app.route('/api/leaderboard')
+def api_leaderboard():
+    """Public API endpoint for leaderboard data"""
+    leaderboard = get_leaderboard_data()
+    return jsonify(leaderboard)
+
 @app.route('/public_leaderboard')
 def public_leaderboard():
     """Public leaderboard view (no login required)"""

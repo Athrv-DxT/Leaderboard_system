@@ -2,17 +2,21 @@
 let previousLeaderboard = [];
 let isAnimating = false;
 
-// Auto-refresh leaderboard every 5 seconds
+// Auto-refresh leaderboard every 3 seconds for faster updates
 setInterval(() => {
     if (window.location.pathname === '/public_leaderboard' || window.location.pathname === '/') {
         fetchLeaderboardData();
     }
-}, 5000);
+}, 3000);
 
 // Fetch leaderboard data and animate changes
 async function fetchLeaderboardData() {
     try {
-        const response = await fetch('/get_leaderboard');
+        showLoading();
+        const response = await fetch('/api/leaderboard');
+        if (!response.ok) {
+            throw new Error('Failed to fetch leaderboard');
+        }
         const newLeaderboard = await response.json();
         
         if (previousLeaderboard.length > 0) {
@@ -21,11 +25,37 @@ async function fetchLeaderboardData() {
         
         previousLeaderboard = [...newLeaderboard];
         updateLeaderboardDisplay(newLeaderboard);
+        hideLoading();
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
-        // Fallback to page reload
-        location.reload();
+        hideLoading();
+        showErrorMessage('Failed to update leaderboard. Retrying...');
     }
+}
+
+// Show error message
+function showErrorMessage(message) {
+    let errorDiv = document.getElementById('error-message');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'error-message';
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            font-family: 'Poppins', sans-serif;
+        `;
+        document.body.appendChild(errorDiv);
+    }
+    errorDiv.textContent = message;
+    setTimeout(() => {
+        if (errorDiv) errorDiv.remove();
+    }, 3000);
 }
 
 // Animate leaderboard changes
@@ -179,7 +209,8 @@ function updateLeaderboardDisplay(leaderboard) {
             const nameElement = card.querySelector('p');
             const scoreElement = card.querySelector('span');
             
-            if (nameElement.textContent !== player.name) {
+            // Update name with animation
+            if (nameElement && nameElement.textContent !== player.name) {
                 nameElement.style.animation = 'nameChange 0.5s ease';
                 setTimeout(() => {
                     nameElement.textContent = player.name;
@@ -187,29 +218,49 @@ function updateLeaderboardDisplay(leaderboard) {
                 }, 250);
             }
             
-            if (scoreElement.textContent !== player.score.toString()) {
+            // Update score with animation
+            if (scoreElement && scoreElement.textContent !== player.score.toString()) {
                 scoreElement.style.animation = 'scoreChange 0.5s ease';
                 setTimeout(() => {
                     scoreElement.textContent = player.score;
                     scoreElement.style.animation = '';
                 }, 250);
             }
+        } else {
+            // Clear if no player at this position
+            const nameElement = card.querySelector('p');
+            const scoreElement = card.querySelector('span');
+            if (nameElement) nameElement.textContent = '—';
+            if (scoreElement) scoreElement.textContent = '0';
         }
     });
     
-    // Update table rows
+    // Update table rows with smooth transitions
     const tbody = document.getElementById('leaderboard-body');
     if (tbody) {
+        // Store current rows for animation
+        const currentRows = Array.from(tbody.querySelectorAll('tr'));
+        
+        // Clear and rebuild
         tbody.innerHTML = '';
         leaderboard.slice(3).forEach((player, index) => {
             const row = document.createElement('tr');
             row.setAttribute('data-player', player.name);
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(20px)';
             row.innerHTML = `
                 <td>${index + 4}</td>
                 <td>${player.name}</td>
                 <td>${player.score}</td>
             `;
             tbody.appendChild(row);
+            
+            // Animate in
+            setTimeout(() => {
+                row.style.transition = 'all 0.5s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, index * 50);
         });
     }
 }
@@ -324,4 +375,42 @@ document.addEventListener('DOMContentLoaded', function() {
             row.setAttribute('data-player', nameCell.textContent.trim());
         }
     });
+    
+    // Add loading indicator
+    addLoadingIndicator();
+    
+    // Fetch initial data
+    fetchLeaderboardData();
 });
+
+// Add loading indicator
+function addLoadingIndicator() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = 'loading-indicator';
+    loadingDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 150, 255, 0.9);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        display: none;
+    `;
+    loadingDiv.innerHTML = '🔄 Updating...';
+    document.body.appendChild(loadingDiv);
+}
+
+// Show/hide loading indicator
+function showLoading() {
+    const loading = document.getElementById('loading-indicator');
+    if (loading) loading.style.display = 'block';
+}
+
+function hideLoading() {
+    const loading = document.getElementById('loading-indicator');
+    if (loading) loading.style.display = 'none';
+}
