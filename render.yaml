@@ -6,8 +6,6 @@ services:
     startCommand: python start.py
     plan: free
     envVars:
-      - key: FIREBASE_SERVICE_ACCOUNT_JSON
-        value: YOUR_FIREBASE_SERVICE_ACCOUNT_JSON_HERE
       - key: API_URL
         value: https://web-production-3b67.up.railway.app/api/users
       - key: API_KEY
@@ -18,3 +16,5 @@ services:
         value: admin123
       - key: SECRET_KEY
         value: 499d40c5943dba125e65670bbf7d3a4bfaa350faa4f313050b968ebc5f8688f8
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/leaderboard.db

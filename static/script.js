@@ -1,7 +1,7 @@
 // Store previous leaderboard state for animations
 let previousLeaderboard = [];
 let isAnimating = false;
-let updateInterval = 30000; // Increased from 3s to 30s to reduce server load
+let updateInterval = 3000; // 3 seconds for real-time updates
 let failureCount = 0;
 
 // Auto-refresh leaderboard with adaptive intervals
@@ -57,7 +57,7 @@ async function fetchLeaderboardData() {
         
         // Reset failure count on success
         failureCount = 0;
-        updateInterval = 30000; // Reset to normal interval
+        updateInterval = 3000; // Reset to normal interval
         
         if (previousLeaderboard.length > 0) {
             animateLeaderboardChanges(previousLeaderboard, newLeaderboard);
