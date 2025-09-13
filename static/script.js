@@ -1,25 +1,63 @@
 // Store previous leaderboard state for animations
 let previousLeaderboard = [];
 let isAnimating = false;
+let updateInterval = 30000; // Increased from 3s to 30s to reduce server load
+let failureCount = 0;
 
-// Auto-refresh leaderboard every 3 seconds for faster updates
-setInterval(() => {
-    if (window.location.pathname === '/public_leaderboard' || 
-        window.location.pathname === '/' || 
-        window.location.pathname === '/admin') {
-        fetchLeaderboardData();
-    }
-}, 3000);
+// Auto-refresh leaderboard with adaptive intervals
+function startAutoRefresh() {
+    setInterval(() => {
+        if (window.location.pathname === '/public_leaderboard' || 
+            window.location.pathname === '/' || 
+            window.location.pathname === '/admin') {
+            fetchLeaderboardData();
+        }
+    }, updateInterval);
+}
 
-// Fetch leaderboard data and animate changes
+// Start auto-refresh on page load
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
+    // Add data attributes to table rows for easier selection
+    const rows = document.querySelectorAll('#leaderboard-body tr');
+    rows.forEach(row => {
+        const nameCell = row.querySelector('td:nth-child(2)');
+        if (nameCell) {
+            row.setAttribute('data-player', nameCell.textContent.trim());
+        }
+    });
+    
+    // Add loading indicator
+    addLoadingIndicator();
+    
+    // Fetch initial data
+    fetchLeaderboardData();
+});
+
+// Fetch leaderboard data and animate changes with error handling
 async function fetchLeaderboardData() {
     try {
         showLoading();
-        const response = await fetch('/api/leaderboard');
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        
+        const response = await fetch('/api/leaderboard', {
+            signal: controller.signal,
+            cache: 'no-cache' // Ensure we get fresh data
+        });
+        
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
-            throw new Error('Failed to fetch leaderboard');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
         const newLeaderboard = await response.json();
+        
+        // Reset failure count on success
+        failureCount = 0;
+        updateInterval = 30000; // Reset to normal interval
         
         if (previousLeaderboard.length > 0) {
             animateLeaderboardChanges(previousLeaderboard, newLeaderboard);
@@ -28,36 +66,58 @@ async function fetchLeaderboardData() {
         previousLeaderboard = [...newLeaderboard];
         updateLeaderboardDisplay(newLeaderboard);
         hideLoading();
+        hideErrorMessage();
+        
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
         hideLoading();
-        showErrorMessage('Failed to update leaderboard. Retrying...');
+        
+        failureCount++;
+        
+        // Adaptive back-off: increase interval on repeated failures
+        if (failureCount > 3) {
+            updateInterval = Math.min(120000, updateInterval * 1.5); // Max 2 minutes
+            showErrorMessage(`Connection issues. Retrying less frequently (${Math.round(updateInterval/1000)}s intervals)...`);
+        } else {
+            showErrorMessage('Failed to update leaderboard. Retrying...');
+        }
+        
+        // Don't update display on failure - keep showing last known good data
     }
 }
 
-// Show error message
+// Show error message with timeout
 function showErrorMessage(message) {
-    let errorDiv = document.getElementById('error-message');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.id = 'error-message';
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            font-family: 'Poppins', sans-serif;
-        `;
-        document.body.appendChild(errorDiv);
-    }
+    hideErrorMessage(); // Clear any existing error
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'error-message';
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 0, 0, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+        max-width: 300px;
+        font-size: 14px;
+    `;
     errorDiv.textContent = message;
-    setTimeout(() => {
-        if (errorDiv) errorDiv.remove();
-    }, 3000);
+    document.body.appendChild(errorDiv);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(hideErrorMessage, 5000);
+}
+
+// Hide error message
+function hideErrorMessage() {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
 }
 
 // Animate leaderboard changes
@@ -258,7 +318,7 @@ function updateLeaderboardDisplay(leaderboard) {
     // Update table rows with smooth transitions
     const tbody = document.getElementById('leaderboard-body');
     if (tbody) {
-        // Clear and rebuild with ALL players (not just slice(3))
+        // Clear and rebuild with ALL players
         tbody.innerHTML = '';
         leaderboard.forEach((player, index) => {
             const row = document.createElement('tr');
@@ -281,7 +341,7 @@ function updateLeaderboardDisplay(leaderboard) {
         });
     }
     
-    // Update admin page if we're on admin page
+    // Update admin display if we're on admin page
     updateAdminDisplay(leaderboard);
 }
 
@@ -407,24 +467,6 @@ style.textContent = `
 }
 `;
 document.head.appendChild(style);
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Add data attributes to table rows for easier selection
-    const rows = document.querySelectorAll('#leaderboard-body tr');
-    rows.forEach(row => {
-        const nameCell = row.querySelector('td:nth-child(2)');
-        if (nameCell) {
-            row.setAttribute('data-player', nameCell.textContent.trim());
-        }
-    });
-    
-    // Add loading indicator
-    addLoadingIndicator();
-    
-    // Fetch initial data
-    fetchLeaderboardData();
-});
 
 // Add loading indicator
 function addLoadingIndicator() {
