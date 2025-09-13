@@ -315,13 +315,16 @@ td {
     100% { background-position: 0% 50%; }
 }
 
-/* Top 3 podium */
+/* Top 3 podium - Real podium layout */
 .top-3 {
     display: flex;
     justify-content: center;
-    gap: 26px;
+    align-items: flex-end;
+    gap: 20px;
     margin-bottom: 30px;
     flex-wrap: wrap;
+    position: relative;
+    height: 200px;
 }
 
 .player-card {
@@ -337,6 +340,25 @@ td {
     border: 1px solid rgba(255,255,255,0.1);
     position: relative;
     overflow: hidden;
+}
+
+/* Podium positioning */
+.player-card.first {
+    order: 2; /* Center position */
+    transform: translateY(-20px); /* Highest position */
+    z-index: 3;
+}
+
+.player-card.second {
+    order: 1; /* Left position */
+    transform: translateY(-10px); /* Medium height */
+    z-index: 2;
+}
+
+.player-card.third {
+    order: 3; /* Right position */
+    transform: translateY(0px); /* Lowest position */
+    z-index: 1;
 }
 
 .player-card::before {
@@ -361,6 +383,7 @@ td {
         0 0 30px rgba(255,255,255,0.1);
 }
 
+/* Podium background colors */
 .player-card.first {
     background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,165,0,0.1));
     box-shadow: 
@@ -814,15 +837,63 @@ th::after {
     transform: translateY(-2px);
 }
 
+.admin-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.btn-reset {
+    background: linear-gradient(45deg, #f44336, #d32f2f);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+}
+
+.btn-reset:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .top-3 {
         gap: 12px;
+        height: 180px;
     }
     
     .player-card {
         width: 120px;
         padding: 15px;
+    }
+    
+    .player-card.first {
+        transform: translateY(-15px);
+    }
+    
+    .player-card.second {
+        transform: translateY(-8px);
+    }
+    
+    .player-card.third {
+        transform: translateY(0px);
+    }
+    
+    .admin-controls {
+        flex-direction: column;
+        align-items: center;
     }
     
     table {

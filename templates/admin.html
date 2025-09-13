@@ -47,7 +47,10 @@
 
         <div class="sync-info">
             <p>🔄 Auto-syncing with API every 3 seconds</p>
-            <button onclick="manualSync()" class="btn-sync">Manual Sync Now</button>
+            <div class="admin-controls">
+                <button onclick="manualSync()" class="btn-sync">Manual Sync Now</button>
+                <button onclick="resetLeaderboard()" class="btn-reset">Reset Leaderboard</button>
+            </div>
         </div>
     </div>
 </div>
@@ -88,6 +91,58 @@ function customUpdate(playerName) {
 
 function manualSync() {
     location.reload();
+}
+
+function resetLeaderboard() {
+    const password = prompt('⚠️ DANGER: This will reset ALL scores to 0!\n\nEnter admin password to confirm:');
+    
+    if (password === null) {
+        return; // User cancelled
+    }
+    
+    if (password !== 'admin123') { // Use the same password as login
+        alert('❌ Incorrect password! Reset cancelled.');
+        return;
+    }
+    
+    const confirmReset = confirm('⚠️ FINAL WARNING!\n\nThis will reset ALL player scores to 0.\nThis action CANNOT be undone!\n\nAre you absolutely sure?');
+    
+    if (!confirmReset) {
+        alert('Reset cancelled.');
+        return;
+    }
+    
+    // Show loading
+    const resetBtn = document.querySelector('.btn-reset');
+    const originalText = resetBtn.textContent;
+    resetBtn.textContent = 'Resetting...';
+    resetBtn.disabled = true;
+    
+    fetch('/admin/reset_leaderboard', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Leaderboard reset successfully!');
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('❌ Error: ' + error.message);
+    })
+    .finally(() => {
+        resetBtn.textContent = originalText;
+        resetBtn.disabled = false;
+    });
 }
 </script>
 {% endblock %}

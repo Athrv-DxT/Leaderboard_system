@@ -438,6 +438,45 @@ def toggle_sync():
     
     return jsonify({'sync_enabled': sync_control['enabled']})
 
+@app.route('/admin/reset_leaderboard', methods=['POST'])
+def reset_leaderboard():
+    """Reset all player scores to 0 - requires password confirmation"""
+    if 'admin' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    password = data.get('password')
+    
+    if not password:
+        return jsonify({'error': 'Password required'}), 400
+    
+    if password != ADMIN_PASSWORD:
+        return jsonify({'error': 'Incorrect password'}), 403
+    
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        try:
+            # Reset all scores to 0
+            conn.execute("UPDATE players SET score = 0, last_updated = CURRENT_TIMESTAMP")
+            conn.commit()
+            
+            # Invalidate cache to force refresh
+            with leaderboard_cache['lock']:
+                leaderboard_cache['timestamp'] = None
+            
+            print(f"Leaderboard reset by admin - all scores set to 0")
+            return jsonify({'success': True, 'message': 'All scores reset to 0'})
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        print(f"Error resetting leaderboard: {e}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting Flask app on port {port}")
