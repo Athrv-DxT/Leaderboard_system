@@ -118,7 +118,7 @@ body::before {
     position: relative;
     z-index: 2;
     max-width: 1200px;
-    margin: 40px auto;
+    margin: 20px auto;
     text-align: center;
     padding: 20px;
 }
@@ -128,7 +128,7 @@ body::before {
 
 .main-heading {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     position: relative;
 }
 
@@ -321,7 +321,7 @@ td {
     justify-content: center;
     align-items: flex-end;
     gap: 25px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     position: relative;
     height: 280px;
@@ -548,7 +548,7 @@ td {
 /* Table */
 table {
     width: 90%;
-    margin: 0 auto 60px;
+    margin: 0 auto 40px;
     border-collapse: collapse;
     background: rgba(255,255,255,0.05);
     border-radius: 20px;
