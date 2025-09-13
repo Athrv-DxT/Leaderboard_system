@@ -59,12 +59,15 @@ async function fetchLeaderboardData() {
         failureCount = 0;
         updateInterval = 3000; // Reset to normal interval
         
+        // Update display immediately, then add animations
+        updateLeaderboardDisplay(newLeaderboard);
+        
+        // Add animations after display is updated
         if (previousLeaderboard.length > 0) {
             animateLeaderboardChanges(previousLeaderboard, newLeaderboard);
         }
         
         previousLeaderboard = [...newLeaderboard];
-        updateLeaderboardDisplay(newLeaderboard);
         hideLoading();
         hideErrorMessage();
         
@@ -120,14 +123,10 @@ function hideErrorMessage() {
     }
 }
 
-// Animate leaderboard changes
+// Animate leaderboard changes (non-blocking)
 function animateLeaderboardChanges(oldData, newData) {
-    if (isAnimating) return;
-    isAnimating = true;
-    
     // Create maps for easy lookup
     const oldMap = new Map(oldData.map(player => [player.name, player]));
-    const newMap = new Map(newData.map(player => [player.name, player]));
     
     // Find players who moved up or down
     const changes = [];
@@ -148,14 +147,12 @@ function animateLeaderboardChanges(oldData, newData) {
         }
     });
     
-    // Animate changes
-    changes.forEach(change => {
-        animateRankChange(change);
-    });
-    
+    // Animate changes with a small delay to ensure DOM is updated
     setTimeout(() => {
-        isAnimating = false;
-    }, 2000);
+        changes.forEach(change => {
+            animateRankChange(change);
+        });
+    }, 100);
 }
 
 // Animate individual rank changes
@@ -288,22 +285,24 @@ function updateLeaderboardDisplay(leaderboard) {
                 const nameElement = card.querySelector('p');
                 const scoreElement = card.querySelector('span');
                 
-                // Update name with animation
+                // Update name with instant change and visual feedback
                 if (nameElement && nameElement.textContent !== player.name) {
-                    nameElement.style.animation = 'nameChange 0.5s ease';
+                    nameElement.textContent = player.name;
+                    // Add a subtle flash effect
+                    nameElement.style.animation = 'nameChange 0.3s ease';
                     setTimeout(() => {
-                        nameElement.textContent = player.name;
                         nameElement.style.animation = '';
-                    }, 250);
+                    }, 300);
                 }
                 
-                // Update score with animation
+                // Update score with instant change and visual feedback
                 if (scoreElement && scoreElement.textContent !== player.score.toString()) {
-                    scoreElement.style.animation = 'scoreChange 0.5s ease';
+                    scoreElement.textContent = player.score;
+                    // Add a subtle flash effect
+                    scoreElement.style.animation = 'scoreChange 0.3s ease';
                     setTimeout(() => {
-                        scoreElement.textContent = player.score;
                         scoreElement.style.animation = '';
-                    }, 250);
+                    }, 300);
                 }
             } else {
                 // Clear if no player at this position
@@ -315,29 +314,52 @@ function updateLeaderboardDisplay(leaderboard) {
         });
     }
     
-    // Update table rows with smooth transitions
+    // Update table rows with instant updates and smooth animations
     const tbody = document.getElementById('leaderboard-body');
     if (tbody) {
+        // Store existing rows for comparison
+        const existingRows = Array.from(tbody.querySelectorAll('tr'));
+        const existingData = new Map();
+        existingRows.forEach(row => {
+            const name = row.getAttribute('data-player');
+            const rank = parseInt(row.querySelector('td:first-child').textContent);
+            const score = parseInt(row.querySelector('td:last-child').textContent);
+            existingData.set(name, { rank, score, element: row });
+        });
+        
         // Clear and rebuild with ALL players
         tbody.innerHTML = '';
         leaderboard.forEach((player, index) => {
             const row = document.createElement('tr');
             row.setAttribute('data-player', player.name);
-            row.style.opacity = '0';
-            row.style.transform = 'translateY(20px)';
+            
+            // Check if this player had a previous rank/score
+            const previous = existingData.get(player.name);
+            const rankChanged = previous && previous.rank !== player.rank;
+            const scoreChanged = previous && previous.score !== player.score;
+            
             row.innerHTML = `
                 <td>${player.rank}</td>
                 <td>${player.name}</td>
                 <td>${player.score}</td>
             `;
-            tbody.appendChild(row);
             
-            // Animate in
-            setTimeout(() => {
-                row.style.transition = 'all 0.5s ease';
-                row.style.opacity = '1';
-                row.style.transform = 'translateY(0)';
-            }, index * 50);
+            // Add animation classes for changes
+            if (rankChanged) {
+                row.classList.add('rank-change', player.rank < (previous?.rank || 0) ? 'up' : 'down');
+                setTimeout(() => {
+                    row.classList.remove('rank-change', 'up', 'down');
+                }, 1500);
+            }
+            
+            if (scoreChanged) {
+                row.classList.add('score-change');
+                setTimeout(() => {
+                    row.classList.remove('score-change');
+                }, 800);
+            }
+            
+            tbody.appendChild(row);
         });
     }
     
@@ -463,6 +485,17 @@ style.textContent = `
 
 @keyframes flashAnim {
     0% { background: rgba(0,255,150,0.14); transform: scale(1.01); }
+    100% { background: transparent; transform: scale(1); }
+}
+
+/* Score change animation */
+.score-change {
+    animation: scoreFlash 0.8s ease;
+}
+
+@keyframes scoreFlash {
+    0% { background: rgba(0,255,150,0.2); transform: scale(1.02); }
+    50% { background: rgba(0,255,150,0.4); transform: scale(1.05); }
     100% { background: transparent; transform: scale(1); }
 }
 `;
